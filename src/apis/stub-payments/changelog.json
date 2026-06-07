@@ -1,0 +1,14 @@
+[
+  {
+    "version": "1.0.0",
+    "date": "2024-06-01",
+    "type": "Feature",
+    "description": "Initial release of the Payments API with create, list, and cancel endpoints."
+  },
+  {
+    "version": "0.9.0",
+    "date": "2024-05-15",
+    "type": "Fix",
+    "description": "Fixed idempotency key handling on duplicate payment requests."
+  }
+]

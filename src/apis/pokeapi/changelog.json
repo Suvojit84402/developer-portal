@@ -1,0 +1,26 @@
+[
+  {
+    "version": "2.0.0",
+    "date": "2024-01-15",
+    "type": "Feature",
+    "description": "Added comprehensive Pokémon encounter location endpoints."
+  },
+  {
+    "version": "1.9.0",
+    "date": "2023-11-02",
+    "type": "Fix",
+    "description": "Fixed pagination offset handling for large result sets."
+  },
+  {
+    "version": "1.8.0",
+    "date": "2023-08-20",
+    "type": "Breaking",
+    "description": "Renamed deprecated /pokemon-species endpoint references in documentation."
+  },
+  {
+    "version": "1.7.0",
+    "date": "2023-05-10",
+    "type": "Feature",
+    "description": "Added move damage class and contest type metadata."
+  }
+]

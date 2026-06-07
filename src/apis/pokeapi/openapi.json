@@ -1,0 +1,419 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PokéAPI",
+    "description": "All the Pokémon data you'll ever need in one place, easily accessible through a modern RESTful API.",
+    "version": "2.0.0",
+    "contact": {
+      "name": "PokéAPI",
+      "url": "https://pokeapi.co"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://pokeapi.co/api/v2",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    { "name": "Pokemon", "description": "Pokémon resource endpoints" },
+    { "name": "Type", "description": "Pokémon type endpoints" },
+    { "name": "Ability", "description": "Pokémon ability endpoints" },
+    { "name": "Move", "description": "Pokémon move endpoints" },
+    { "name": "Evolution", "description": "Evolution chain endpoints" }
+  ],
+  "paths": {
+    "/pokemon/{idOrName}": {
+      "get": {
+        "operationId": "getPokemon",
+        "tags": ["Pokemon"],
+        "summary": "Get Pokémon",
+        "description": "Retrieve information about a specific Pokémon by ID or name.",
+        "parameters": [
+          {
+            "name": "idOrName",
+            "in": "path",
+            "required": true,
+            "description": "The Pokémon ID or name",
+            "schema": { "type": "string" },
+            "example": "pikachu"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pokemon" }
+              }
+            }
+          },
+          "404": {
+            "description": "Pokémon not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pokemon": {
+      "get": {
+        "operationId": "listPokemon",
+        "tags": ["Pokemon"],
+        "summary": "List Pokémon",
+        "description": "Retrieve a paginated list of Pokémon.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of results to return per page",
+            "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of results to skip",
+            "schema": { "type": "integer", "default": 0, "minimum": 0 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PokemonList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pokemon/{idOrName}/encounters": {
+      "get": {
+        "operationId": "getPokemonEncounters",
+        "tags": ["Pokemon"],
+        "summary": "Get Pokémon encounters",
+        "description": "Retrieve location areas where a Pokémon can be encountered.",
+        "parameters": [
+          {
+            "name": "idOrName",
+            "in": "path",
+            "required": true,
+            "description": "The Pokémon ID or name",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/LocationAreaEncounter" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/type/{idOrName}": {
+      "get": {
+        "operationId": "getType",
+        "tags": ["Type"],
+        "summary": "Get type",
+        "description": "Retrieve information about a specific Pokémon type.",
+        "parameters": [
+          {
+            "name": "idOrName",
+            "in": "path",
+            "required": true,
+            "description": "The type ID or name",
+            "schema": { "type": "string" },
+            "example": "electric"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Type" }
+              }
+            }
+          },
+          "404": {
+            "description": "Type not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/type": {
+      "get": {
+        "operationId": "listTypes",
+        "tags": ["Type"],
+        "summary": "List types",
+        "description": "Retrieve a paginated list of Pokémon types.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NamedAPIResourceList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ability/{idOrName}": {
+      "get": {
+        "operationId": "getAbility",
+        "tags": ["Ability"],
+        "summary": "Get ability",
+        "description": "Retrieve information about a specific Pokémon ability.",
+        "parameters": [
+          {
+            "name": "idOrName",
+            "in": "path",
+            "required": true,
+            "description": "The ability ID or name",
+            "schema": { "type": "string" },
+            "example": "static"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Ability" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move/{idOrName}": {
+      "get": {
+        "operationId": "getMove",
+        "tags": ["Move"],
+        "summary": "Get move",
+        "description": "Retrieve information about a specific Pokémon move.",
+        "parameters": [
+          {
+            "name": "idOrName",
+            "in": "path",
+            "required": true,
+            "description": "The move ID or name",
+            "schema": { "type": "string" },
+            "example": "thunderbolt"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Move" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/evolution-chain/{id}": {
+      "get": {
+        "operationId": "getEvolutionChain",
+        "tags": ["Evolution"],
+        "summary": "Get evolution chain",
+        "description": "Retrieve an evolution chain by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The evolution chain ID",
+            "schema": { "type": "integer" },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EvolutionChain" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "detail": { "type": "string", "description": "Error detail message" }
+        }
+      },
+      "NamedAPIResource": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string", "format": "uri" }
+        }
+      },
+      "NamedAPIResourceList": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "next": { "type": "string", "nullable": true },
+          "previous": { "type": "string", "nullable": true },
+          "results": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/NamedAPIResource" }
+          }
+        }
+      },
+      "PokemonList": {
+        "allOf": [{ "$ref": "#/components/schemas/NamedAPIResourceList" }]
+      },
+      "Pokemon": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "height": { "type": "integer" },
+          "weight": { "type": "integer" },
+          "base_experience": { "type": "integer" },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slot": { "type": "integer" },
+                "type": { "$ref": "#/components/schemas/NamedAPIResource" }
+              }
+            }
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ability": { "$ref": "#/components/schemas/NamedAPIResource" },
+                "is_hidden": { "type": "boolean" },
+                "slot": { "type": "integer" }
+              }
+            }
+          },
+          "stats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "base_stat": { "type": "integer" },
+                "effort": { "type": "integer" },
+                "stat": { "$ref": "#/components/schemas/NamedAPIResource" }
+              }
+            }
+          },
+          "sprites": {
+            "type": "object",
+            "properties": {
+              "front_default": { "type": "string", "nullable": true },
+              "back_default": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "Type": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "damage_relations": { "type": "object" },
+          "pokemon": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pokemon": { "$ref": "#/components/schemas/NamedAPIResource" },
+                "slot": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "Ability": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "effect_entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "effect": { "type": "string" },
+                "language": { "$ref": "#/components/schemas/NamedAPIResource" }
+              }
+            }
+          }
+        }
+      },
+      "Move": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "accuracy": { "type": "integer", "nullable": true },
+          "power": { "type": "integer", "nullable": true },
+          "pp": { "type": "integer" },
+          "type": { "$ref": "#/components/schemas/NamedAPIResource" },
+          "damage_class": { "$ref": "#/components/schemas/NamedAPIResource" }
+        }
+      },
+      "EvolutionChain": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "chain": { "type": "object" }
+        }
+      },
+      "LocationAreaEncounter": {
+        "type": "object",
+        "properties": {
+          "location_area": { "$ref": "#/components/schemas/NamedAPIResource" },
+          "version_details": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    }
+  }
+}
