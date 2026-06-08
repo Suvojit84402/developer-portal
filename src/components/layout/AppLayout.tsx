@@ -6,7 +6,7 @@ import { useAuth } from '@/features/auth/useAuth';
 import { useEnvironmentStore, useThemeStore } from '@/lib/stores';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 
 const navItems = [
   { to: '/docs', label: 'Documentation' },
@@ -20,9 +20,15 @@ const navItems = [
 export function AppLayout() {
   const { user, signOut } = useAuth();
   const { apiId } = useParams();
+  const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { environment, setEnvironment } = useEnvironmentStore();
   const { theme, setTheme } = useThemeStore();
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -46,8 +52,33 @@ export function AppLayout() {
     <div className="min-h-screen bg-background text-foreground">
       <IncidentBanner />
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 shrink-0 border-r border-border bg-sidebar p-4 lg:block">
-          <Link to="/docs" className="text-lg font-semibold">
+        {sidebarOpen ? (
+          <button
+            type="button"
+            aria-label="Close navigation menu"
+            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        ) : null}
+        <aside
+          className={cn(
+            'fixed inset-y-0 left-0 z-50 w-72 shrink-0 overflow-y-auto border-r border-border bg-sidebar p-4 transition-transform lg:static lg:z-auto lg:block lg:translate-x-0',
+            sidebarOpen ? 'block translate-x-0' : 'hidden -translate-x-full lg:block',
+          )}
+        >
+          <div className="mb-4 flex items-center justify-between lg:hidden">
+            <Link
+              to="/docs"
+              className="text-lg font-semibold"
+              onClick={() => setSidebarOpen(false)}
+            >
+              {import.meta.env.VITE_APP_NAME || 'Developer Portal'}
+            </Link>
+            <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
+              Close
+            </Button>
+          </div>
+          <Link to="/docs" className="hidden text-lg font-semibold lg:inline">
             {import.meta.env.VITE_APP_NAME || 'Developer Portal'}
           </Link>
           <nav className="mt-6 space-y-1">
@@ -56,6 +87,7 @@ export function AppLayout() {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  onClick={() => setSidebarOpen(false)}
                   className={({ isActive }) =>
                     cn(
                       'block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted',
@@ -77,6 +109,7 @@ export function AppLayout() {
                 <NavLink
                   key={api.id}
                   to={`/docs/${api.id}`}
+                  onClick={() => setSidebarOpen(false)}
                   className={({ isActive }) =>
                     cn(
                       'block rounded-md px-3 py-2 text-sm hover:bg-muted',
@@ -93,6 +126,14 @@ export function AppLayout() {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(true)}
+              >
+                Menu
+              </Button>
               <Button variant="secondary" size="sm" onClick={() => setSearchOpen(true)}>
                 Search <span className="ml-2 text-xs text-muted-foreground">Ctrl+K</span>
               </Button>

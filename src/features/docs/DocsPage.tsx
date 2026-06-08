@@ -17,7 +17,10 @@ export function DocsPage() {
 
   if (!api) {
     return (
-      <ErrorState message="The requested API was not found in the registry." />
+      <ErrorState
+        title="API Not Found"
+        message="The requested API was not found in the registry."
+      />
     );
   }
 
@@ -113,7 +116,10 @@ export function DocsPage() {
         ) : endpoint ? (
           <EndpointDetail apiId={api.id} endpoint={endpoint} spec={api.spec} />
         ) : (
-          <ErrorState message="Endpoint not found in the OpenAPI specification." />
+          <ErrorState
+            title="Endpoint Not Found"
+            message="Endpoint not found in the OpenAPI specification."
+          />
         )}
       </section>
     </div>

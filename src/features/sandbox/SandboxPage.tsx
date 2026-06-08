@@ -15,7 +15,7 @@ import {
   generatePython,
 } from '@/lib/snippet-generator';
 import { getEndpointByOperationId, schemaToExample } from '@/lib/spec-parser';
-import { useEnvironmentStore, useRequestHistoryStore } from '@/lib/stores';
+import { useEnvironmentStore, useApiKeyStore, useRequestHistoryStore } from '@/lib/stores';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { useMutation } from '@tanstack/react-query';
@@ -29,6 +29,8 @@ export function SandboxPage() {
   const { token } = useAuth();
   const { environment } = useEnvironmentStore();
   const addHistoryEntry = useRequestHistoryStore((state) => state.addEntry);
+  const apiKeys = useApiKeyStore((state) => state.keys);
+  const markKeyUsed = useApiKeyStore((state) => state.markKeyUsed);
   const api = apiId ? getApiById(apiId) : undefined;
   const endpoint =
     api && operationId ? getEndpointByOperationId(api.spec, operationId) : undefined;
@@ -42,14 +44,19 @@ export function SandboxPage() {
   const [snippetTab, setSnippetTab] = useState<SnippetTab>('curl');
 
   useEffect(() => {
-    if (!endpoint) {
+    if (!api || !operationId) {
+      return;
+    }
+
+    const currentEndpoint = getEndpointByOperationId(api.spec, operationId);
+    if (!currentEndpoint) {
       return;
     }
 
     const nextPathParams: Record<string, string> = {};
     const nextQueryParams: Record<string, string> = {};
 
-    for (const param of endpoint.parameters) {
+    for (const param of currentEndpoint.parameters) {
       if (param.in === 'path') {
         nextPathParams[param.name] = String(param.example ?? param.schema?.example ?? '');
       }
@@ -63,13 +70,13 @@ export function SandboxPage() {
     setPathParams(nextPathParams);
     setQueryParams(nextQueryParams);
 
-    if (endpoint.requestBody) {
-      const schema = endpoint.requestBody.content['application/json']?.schema;
+    if (currentEndpoint.requestBody) {
+      const schema = currentEndpoint.requestBody.content['application/json']?.schema;
       setBody(JSON.stringify(schemaToExample(schema), null, 2));
     } else {
       setBody('{}');
     }
-  }, [endpoint]);
+  }, [api, operationId]);
 
   const baseUrl = useMemo(() => {
     if (!api) {
@@ -77,6 +84,13 @@ export function SandboxPage() {
     }
     return api.baseUrls?.[environment] ?? api.baseUrl;
   }, [api, environment]);
+
+  const activeApiKey = useMemo(() => {
+    const keyEnvironment = environment === 'production' ? 'production' : 'sandbox';
+    return apiKeys.find(
+      (key) => !key.revoked && key.environment === keyEnvironment && key.fullKey,
+    );
+  }, [apiKeys, environment]);
 
   const requestUrl = useMemo(() => {
     if (!endpoint) {
@@ -89,12 +103,14 @@ export function SandboxPage() {
     const next = { ...headers };
     if (token) {
       next.Authorization = `Bearer ${token}`;
+    } else if (activeApiKey?.fullKey) {
+      next.Authorization = `Bearer ${activeApiKey.fullKey}`;
     }
     if (endpoint?.requestBody) {
       next['Content-Type'] = 'application/json';
     }
     return next;
-  }, [headers, token, endpoint]);
+  }, [headers, token, activeApiKey, endpoint]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -122,6 +138,10 @@ export function SandboxPage() {
       }
 
       const formatted = typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2);
+
+      if (!token && activeApiKey) {
+        markKeyUsed(activeApiKey.id);
+      }
 
       addHistoryEntry({
         id: crypto.randomUUID(),
@@ -164,7 +184,9 @@ export function SandboxPage() {
   }, [snippetTab, endpoint, requestUrl, requestHeaders, body]);
 
   if (!api || !endpoint) {
-    return <ErrorState message="Sandbox endpoint not found." />;
+    return (
+      <ErrorState title="Sandbox Unavailable" message="Sandbox endpoint not found." />
+    );
   }
 
   return (
@@ -245,7 +267,10 @@ export function SandboxPage() {
             </div>
           ) : null}
           {mutation.isError ? (
-            <ErrorState message="The sandbox request failed. Check your parameters and try again." />
+            <ErrorState
+              title="Request Failed"
+              message="The sandbox request failed. Check your parameters and try again."
+            />
           ) : null}
           {mutation.data ? (
             <>

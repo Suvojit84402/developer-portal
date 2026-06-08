@@ -25,7 +25,7 @@ describe('snippet-generator', () => {
       { idOrName: 'pikachu' },
       { limit: '10' },
     );
-    expect(url).toContain('/pokemon/pikachu');
+    expect(url).toBe('https://pokeapi.co/api/v2/pokemon/pikachu?limit=10');
   });
 
   it('generates a curl command with auth header', () => {

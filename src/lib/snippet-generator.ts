@@ -76,7 +76,10 @@ export function buildRequestUrl(
     resolvedPath = resolvedPath.replace(`{${key}}`, encodeURIComponent(value));
   }
 
-  const url = new URL(resolvedPath, baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`);
+  const normalizedBase = baseUrl.replace(/\/+$/, '');
+  const normalizedPath = resolvedPath.startsWith('/') ? resolvedPath : `/${resolvedPath}`;
+  const url = new URL(`${normalizedBase}${normalizedPath}`);
+
   for (const [key, value] of Object.entries(queryParams)) {
     if (value !== '') {
       url.searchParams.set(key, value);

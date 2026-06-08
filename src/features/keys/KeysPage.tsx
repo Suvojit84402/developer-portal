@@ -18,11 +18,14 @@ export function KeysPage() {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
 
   function handleCreate(event: React.FormEvent) {
     event.preventDefault();
+    setError('');
     const parsed = createKeySchema.safeParse({ name, environment, expiresAt });
     if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Invalid form input.');
       return;
     }
 
@@ -86,6 +89,7 @@ export function KeysPage() {
           </Button>
         </div>
       </form>
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {createdKey ? (
         <div className="rounded-xl border border-amber-300 bg-amber-50 p-6 dark:border-amber-700 dark:bg-amber-950/20">
